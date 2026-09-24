@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  assistant:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai-devops-assistant
+    ports:
+      - "8000:8000"
+    environment:
+      - LLM_PROVIDER=gemini
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GITHUB_WEBHOOK_SECRET=devops-assistant-webhook-secret
+    volumes:
+      - ./app:/app/app
+    restart: unless-stopped
+    networks:
+      - devops-net
+
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: devops-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    restart: unless-stopped
+    networks:
+      - devops-net
+
+  grafana:
+    image: grafana/grafana:10.4.0
+    container_name: devops-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    restart: unless-stopped
+    networks:
+      - devops-net
+
+networks:
+  devops-net:
+    driver: bridge

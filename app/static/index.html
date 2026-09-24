@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI DevOps Assistant | GitHub App & GitOps Engine</title>
+  <meta name="description" content="AI-Powered DevOps Assistant for GitHub Actions, Automated PR Reviews, CI/CD Failure Diagnosis, and ArgoCD GitOps Deployments to Kubernetes.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <a href="/" class="brand">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-text">
+          <h1>AI DevOps Assistant</h1>
+          <p>GitHub App • CI/CD Guardian • GitOps Engine</p>
+        </div>
+      </a>
+      <div class="status-badges">
+        <div class="badge badge-primary">
+          <span class="badge-dot"></span>
+          <span id="status-llm">LLM: GEMINI (Active)</span>
+        </div>
+        <div class="badge badge-success">
+          <span class="badge-dot"></span>
+          <span id="status-argo">ArgoCD: Healthy</span>
+        </div>
+        <div class="badge badge-cyan">
+          <span class="badge-dot"></span>
+          <span>AWS EKS: Connected</span>
+        </div>
+        
+        <!-- User Profile / Auth Button -->
+        <div id="auth-nav-container">
+          <button class="btn btn-secondary" id="btn-open-auth" style="padding: 6px 14px; font-size: 0.8rem;">
+            <span>🐙</span> Sign In / GitHub
+          </button>
+          <div id="user-profile-widget" style="display: none; align-items: center; gap: 8px;">
+            <img id="user-avatar" src="" alt="Avatar" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-glow);">
+            <span id="user-name" style="font-size: 0.85rem; font-weight: 600;"></span>
+            <button id="btn-logout" title="Sign Out" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.9rem; padding: 2px 6px;">🚪</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Metrics Bar -->
+  <section class="metrics-section">
+    <div class="container">
+      <div class="metrics-grid">
+        <div class="glass-panel metric-card">
+          <div class="metric-title">
+            <span>PRs Reviewed</span>
+            <span>🔀</span>
+          </div>
+          <div class="metric-value" id="metric-prs-reviewed">128</div>
+          <div class="metric-subtitle">With security scans & suggested fixes</div>
+        </div>
+
+        <div class="glass-panel metric-card">
+          <div class="metric-title">
+            <span>Failures Diagnosed</span>
+            <span>🚨</span>
+          </div>
+          <div class="metric-value" id="metric-failures-diagnosed">43</div>
+          <div class="metric-subtitle">Root causes & patches generated</div>
+        </div>
+
+        <div class="glass-panel metric-card">
+          <div class="metric-title">
+            <span>GitOps Deployments</span>
+            <span>🚀</span>
+          </div>
+          <div class="metric-value" id="metric-gitops-syncs">95</div>
+          <div class="metric-subtitle">Reconciled via ArgoCD to AWS EKS</div>
+        </div>
+
+        <div class="glass-panel metric-card">
+          <div class="metric-title">
+            <span>Avg Response Time</span>
+            <span>⚡</span>
+          </div>
+          <div class="metric-value">1.4s</div>
+          <div class="metric-subtitle">Webhook ingestion to PR comment</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Dashboard Workbench -->
+  <main class="dashboard-main">
+    <div class="container">
+      
+      <!-- Tab Navigation -->
+      <div class="tabs-nav">
+        <button class="tab-button active" data-tab="tab-pr-review" id="tab-btn-pr">
+          <span>🔍</span> PR Review Studio
+        </button>
+        <button class="tab-button" data-tab="tab-repos" id="tab-btn-repos">
+          <span>📦</span> Connected Repositories & Automation
+        </button>
+        <button class="tab-button" data-tab="tab-diagnose" id="tab-btn-diagnose">
+          <span>🚨</span> CI/CD Failure Diagnoser
+        </button>
+        <button class="tab-button" data-tab="tab-gitops" id="tab-btn-gitops">
+          <span>☸️</span> GitOps & ArgoCD Monitor
+        </button>
+        <button class="tab-button" data-tab="tab-feed" id="tab-btn-feed">
+          <span>📡</span> Live Events & Simulator
+        </button>
+      </div>
+
+      <!-- Tab 1: PR Review Studio -->
+      <div class="tab-content active" id="tab-pr-review">
+        <div class="workbench-grid">
+          <!-- Input Form -->
+          <div class="glass-panel">
+            <div class="panel-header">
+              <h3><span>📝</span> Pull Request Context</h3>
+              <span class="badge badge-primary">Trivy + SonarQube Scanners</span>
+            </div>
+            <div class="panel-body">
+              <!-- PR Link Direct Ingestion -->
+              <div class="form-group" style="background: rgba(99, 102, 241, 0.08); padding: 14px; border-radius: var(--radius-sm); border: 1px dashed rgba(99, 102, 241, 0.3); margin-bottom: 18px;">
+                <label class="form-label" for="pr-url-input" style="color: #a5b4fc; display: flex; justify-content: space-between;">
+                  <span>🔗 Paste GitHub PR Link / URL</span>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">e.g. https://github.com/owner/repo/pull/123</span>
+                </label>
+                <div style="display: flex; gap: 8px;">
+                  <input type="text" id="pr-url-input" class="form-input" placeholder="https://github.com/facebook/react/pull/28000" style="flex: 1;">
+                  <button class="btn btn-secondary" id="btn-fetch-pr" style="white-space: nowrap;">
+                    📥 Fetch PR
+                  </button>
+                </div>
+                <div id="fetch-pr-status" style="font-size: 0.75rem; margin-top: 6px; display: none;"></div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="pr-title-input">PR Title</label>
+                <input type="text" id="pr-title-input" class="form-input" value="feat(auth): implement user login with direct SQL query and token">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="pr-diff-input">Unified Git Diff</label>
+                <textarea id="pr-diff-input" class="form-textarea" rows="8">diff --git a/app/api/auth.py b/app/api/auth.py
+index a1b2c3d..e4f5g6h 100644
+--- a/app/api/auth.py
++++ b/app/api/auth.py
+@@ -10,6 +10,13 @@ router = APIRouter()
+ 
++@router.post("/login")
++def login(user_data: dict):
++    # Raw database execution without parameterization
++    query = f"SELECT * FROM users WHERE username = '{user_data.get('user')}'"
++    db.execute(query)
++    return {"token": "secret-token-12345"}
++
+ def get_current_user():
+     pass</textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="pr-trivy-input">Trivy & SonarQube Findings (JSON/SARIF)</label>
+                <textarea id="pr-trivy-input" class="form-textarea" rows="4">{
+  "trivy": {
+    "vulnerabilities": [
+      {"id": "CVE-2024-21626", "severity": "HIGH", "pkg": "runc", "fixed_in": "1.1.12"}
+    ]
+  },
+  "sonarqube": {
+    "issues": [
+      {"rule": "python:S3649", "severity": "BLOCKER", "message": "SQL queries should not be vulnerable to injection"}
+    ]
+  }
+}</textarea>
+              </div>
+
+              <button class="btn btn-primary" id="btn-run-pr-review" style="width: 100%;">
+                🚀 Run AI Code & Security Review
+              </button>
+            </div>
+          </div>
+
+          <!-- Output Panel -->
+          <div class="glass-panel">
+            <div class="panel-header">
+              <h3><span>🤖</span> Generated PR Review & Suggested Fixes</h3>
+              <span class="badge badge-success">GitHub-Ready Markdown</span>
+            </div>
+            <div class="panel-body">
+              <div class="output-area" id="pr-review-output">
+                <div class="output-placeholder">
+                  <span>✨</span>
+                  <p>Click "Run AI Code & Security Review" to analyze the diff and generate automated line-level feedback.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Connected Repositories & Automation -->
+      <div class="tab-content" id="tab-repos">
+        <div class="workbench-grid" style="grid-template-columns: 1fr 1.2fr;">
+          <!-- Left: Repository List -->
+          <div class="glass-panel">
+            <div class="panel-header">
+              <h3><span>🐙</span> Connected GitHub Repositories</h3>
+              <button class="btn btn-secondary" id="btn-refresh-repos" style="padding: 4px 10px; font-size: 0.75rem;">
+                🔄 Refresh
+              </button>
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                <input type="text" id="repo-search-input" class="form-input" placeholder="🔍 Search repositories...">
+              </div>
+              <div id="repo-list-container" style="display: flex; flex-direction: column; gap: 10px; max-height: 520px; overflow-y: auto;">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: PR Inspection & Automated Review -->
+          <div class="glass-panel">
+            <div class="panel-header">
+              <h3 id="selected-repo-title"><span>🔍</span> Select a Repository to Inspect PRs</h3>
+              <span class="badge badge-primary" id="selected-repo-badge">Automated CI/CD Ready</span>
+            </div>
+            <div class="panel-body">
+              <div id="pr-list-container">
+                <div class="output-placeholder">
+                  <span>📦</span>
+                  <p>Select any repository on the left to inspect its open pull requests, branches, and trigger automated AI code reviews.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: CI/CD Failure Diagnoser -->
+      <div class="tab-content" id="tab-diagnose">
+        <div class="workbench-grid">
+          <!-- Input Form -->
+          <div class="glass-panel">
+            <div class="panel-header">
+              <h3><span>⚙️</span> GitHub Actions Failure Context</h3>
+              <span class="badge badge-danger">Exit Code 1</span>
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label class="form-label" for="log-workflow-input">Workflow & Step Name</label>
+                <input type="text" id="log-workflow-input" class="form-input" value="CI / Run Automated Pytest & Security Check">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="log-text-input">Raw Step Logs</label>
+                <textarea id="log-text-input" class="form-textarea" rows="14">2026-09-21T14:30:11.2345678Z ============================= test session starts ==============================
+2026-09-21T14:30:12.3456789Z collecting ... collected 18 items
+2026-09-21T14:30:14.4567890Z tests/test_auth.py::test_login_success PASSED
+2026-09-21T14:30:15.5678901Z tests/test_auth.py::test_sql_injection FAILED
+2026-09-21T14:30:15.6789012Z 
+2026-09-21T14:30:15.6789123Z =================================== FAILURES ===================================
+2026-09-21T14:30:15.6789234Z _____________________________ test_sql_injection ______________________________
+2026-09-21T14:30:15.6789345Z tests/test_auth.py:42: in test_sql_injection
+2026-09-21T14:30:15.6789456Z     assert response.status_code == 400
+2026-09-21T14:30:15.6789567Z E   AssertionError: assert 200 == 400
+2026-09-21T14:30:15.6789678Z E    +  where 200 = <Response [200 OK]>.status_code
+2026-09-21T14:30:16.7890123Z =========================== short test summary info ============================
+2026-09-21T14:30:16.7891234Z FAILED tests/test_auth.py::test_sql_injection - AssertionError: assert 200 == 400
+2026-09-21T14:30:16.7892345Z ##[error]Process completed with exit code 1.</textarea>
+              </div>
+
+              <button class="btn btn-primary" id="btn-run-diagnose" style="width: 100%;">
+                🔍 Diagnose Build Failure
+              </button>
+            </div>
+          </div>
+
+          <!-- Output Panel -->
+          <div class="glass-panel">
+            <div class="panel-header">
+              <h3><span>🔬</span> Root Cause Analysis & Automated Patch</h3>
+              <span class="badge badge-primary">AI SRE Specialist</span>
+            </div>
+            <div class="panel-body">
+              <div class="output-area" id="log-diagnosis-output">
+                <div class="output-placeholder">
+                  <span>🛠️</span>
+                  <p>Submit failure logs to see the isolated root cause and ready-to-apply patch.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: GitOps & ArgoCD Monitor -->
+      <div class="tab-content" id="tab-gitops">
+        <div class="workbench-grid">
+          <div class="glass-panel">
+            <div class="panel-header">
+              <h3><span>☸️</span> ArgoCD Application: <code>cloud-backend</code></h3>
+              <span class="badge badge-success">Synced & Healthy</span>
+            </div>
+            <div class="panel-body">
+              <table style="width: 100%; margin-bottom: 20px;">
+                <tr>
+                  <td style="color: var(--text-secondary);">Target Cluster</td>
+                  <td><strong>AWS EKS (Production)</strong></td>
+                </tr>
+                <tr>
+                  <td style="color: var(--text-secondary);">Namespace</td>
+                  <td><code>production</code></td>
+                </tr>
+                <tr>
+                  <td style="color: var(--text-secondary);">GitOps Repository</td>
+                  <td><code>github.com/org/gitops-manifests</code></td>
+                </tr>
+                <tr>
+                  <td style="color: var(--text-secondary);">Current Image Digest</td>
+                  <td><code>123456789012.dkr.ecr.us-east-1.amazonaws.com/app:c4b8e91</code></td>
+                </tr>
+                <tr>
+                  <td style="color: var(--text-secondary);">Sync Policy</td>
+                  <td><strong>Automated (Prune: Enabled, SelfHeal: Enabled)</strong></td>
+                </tr>
+              </table>
+
+              <button class="btn btn-primary" id="btn-trigger-argocd">
+                ⚡ Trigger ArgoCD GitOps Sync
+              </button>
+              <div id="argocd-sync-msg" style="display: none; margin-top: 12px; color: var(--success); font-weight: 600;"></div>
+            </div>
+          </div>
+
+          <div class="glass-panel">
+            <div class="panel-header">
+              <h3><span>🔄</span> GitOps Merge-to-Deploy Workflow</h3>
+            </div>
+            <div class="panel-body">
+              <ol style="padding-left: 20px; color: var(--text-secondary); line-height: 2;">
+                <li>Developer merges approved Pull Request into <code>main</code>.</li>
+                <li>GitHub Actions triggers <code>ci-cd-on-merge.yml</code>.</li>
+                <li>Docker container is built and tagged with commit SHA.</li>
+                <li>Image is pushed to Amazon ECR.</li>
+                <li>AI DevOps Assistant updates GitOps manifest repo with new image tag.</li>
+                <li>ArgoCD detects change and performs zero-downtime rolling update on AWS EKS.</li>
+                <li>Assistant posts deployment confirmation comment to the PR.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Live Events & Simulator -->
+      <div class="tab-content" id="tab-feed">
+        <div class="glass-panel" style="margin-bottom: 24px;">
+          <div class="panel-header">
+            <h3><span>🧪</span> GitHub Webhook Simulator</h3>
+            <span class="badge badge-primary">Test Automation</span>
+          </div>
+          <div class="panel-body" style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <button class="btn btn-secondary" id="btn-sim-pr">
+              🔀 Simulate PR Opened Event
+            </button>
+            <button class="btn btn-secondary" id="btn-sim-fail">
+              🚨 Simulate CI/CD Failure Event
+            </button>
+            <button class="btn btn-secondary" id="btn-sim-merge">
+              🚀 Simulate PR Merged (GitOps Sync)
+            </button>
+          </div>
+        </div>
+
+        <div class="glass-panel">
+          <div class="panel-header">
+            <h3><span>📡</span> Real-Time Webhook & Pipeline Audit Feed</h3>
+            <span class="badge badge-cyan">Live In-Memory Buffer</span>
+          </div>
+          <div class="panel-body">
+            <div class="event-feed" id="event-feed-container">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      AI DevOps Assistant • Powered by Google Gemini / OpenAI, FastAPI, GitHub Actions, ArgoCD & Terraform on AWS
+    </div>
+  </footer>
+
+  <!-- Authentication Modal -->
+  <div id="auth-modal" class="modal-overlay" style="display: none;">
+    <div class="glass-panel modal-content" style="max-width: 440px; width: 90%; margin: auto; padding: 28px; position: relative;">
+      <button id="btn-close-modal" style="position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;">✕</button>
+      
+      <div style="text-align: center; margin-bottom: 20px;">
+        <div class="brand-icon" style="margin: 0 auto 12px; width: 44px; height: 44px; font-size: 24px;">⚡</div>
+        <h2 style="font-size: 1.3rem; font-weight: 700;">Welcome to DevOps Assistant</h2>
+        <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">Sign in to connect repositories, automate PR reviews & GitOps</p>
+      </div>
+
+      <!-- GitHub One-Click Login -->
+      <a href="/auth/github/login" class="btn btn-primary" id="btn-github-login" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 16px; text-decoration: none; background: #24292e; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 4px 15px rgba(0,0,0,0.4);">
+        <svg height="20" width="20" viewBox="0 0 16 16" fill="white"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+        <span>Continue with GitHub</span>
+      </a>
+
+      <div style="display: flex; align-items: center; gap: 10px; margin: 16px 0; color: var(--text-muted); font-size: 0.75rem;">
+        <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
+        <span>OR DEMO QUICK ACCESS</span>
+        <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
+      </div>
+
+      <!-- Instant Demo Login Button -->
+      <button class="btn btn-secondary" id="btn-demo-login" style="width: 100%; margin-bottom: 16px; border-color: rgba(99, 102, 241, 0.4);">
+        ⚡ Instant Demo Login (Explore Repos)
+      </button>
+
+      <!-- Email / Password Toggle -->
+      <div style="display: flex; gap: 8px; margin-bottom: 14px; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
+        <button id="modal-tab-signin" style="background: none; border: none; color: var(--text-primary); font-weight: 600; cursor: pointer; padding-bottom: 4px; border-bottom: 2px solid var(--accent-primary);">Sign In</button>
+        <button id="modal-tab-signup" style="background: none; border: none; color: var(--text-muted); font-weight: 600; cursor: pointer; padding-bottom: 4px;">Sign Up</button>
+      </div>
+
+      <form id="auth-form">
+        <div class="form-group" id="group-username" style="display: none;">
+          <label class="form-label" for="auth-username">Username</label>
+          <input type="text" id="auth-username" class="form-input" placeholder="johndoe">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="auth-email">Email Address</label>
+          <input type="email" id="auth-email" class="form-input" placeholder="devops@company.com" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="auth-password">Password</label>
+          <input type="password" id="auth-password" class="form-input" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="btn-submit-auth" style="width: 100%;">
+          Sign In
+        </button>
+      </form>
+      <div id="auth-error-msg" style="font-size: 0.75rem; color: var(--danger); margin-top: 8px; text-align: center; display: none;"></div>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

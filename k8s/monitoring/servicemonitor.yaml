@@ -1,0 +1,56 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ai-devops-assistant-monitor
+  namespace: devops-system
+  labels:
+    release: prometheus-stack
+    app.kubernetes.io/name: ai-devops-assistant
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ai-devops-assistant
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ai-devops-assistant-alerts
+  namespace: devops-system
+  labels:
+    release: prometheus-stack
+    role: alert-rules
+spec:
+  groups:
+    - name: ai-devops-assistant.rules
+      rules:
+        - alert: DevOpsAssistantHighErrorRate
+          expr: sum(rate(devops_bot_http_requests_total{status=~"5.."}[5m])) / sum(rate(devops_bot_http_requests_total[5m])) * 100 > 5
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "High HTTP error rate (>5%) on AI DevOps Assistant"
+            description: "The AI DevOps Assistant service in namespace devops-system has a 5xx error rate exceeding 5% for the last 2 minutes."
+
+        - alert: DevOpsAssistantHighLatency
+          expr: histogram_quantile(0.95, sum(rate(devops_bot_http_latency_seconds_bucket[5m])) by (le)) > 3.0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "AI DevOps Assistant P95 Latency > 3s"
+            description: "Webhook processing and LLM inference P95 latency is exceeding 3.0 seconds."
+
+        - alert: DevOpsAssistantPodCrashLooping
+          expr: rate(kube_pod_container_status_restarts_total{container="assistant"}[15m]) > 0.1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "AI DevOps Assistant pod is crash looping"
+            description: "Container assistant in namespace devops-system is repeatedly restarting."
