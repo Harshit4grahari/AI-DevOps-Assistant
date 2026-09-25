@@ -1,13 +1,44 @@
 # ⚡ AI-Powered DevOps Assistant
 
-An enterprise-grade GitHub App, CI/CD Guardian, and GitOps Automation Engine. It integrates directly into any repository's pipeline to provide **automated PR code & security reviews**, **intelligent CI/CD build failure diagnosis**, and **zero-downtime GitOps deployments via ArgoCD to AWS EKS**, all provisioned with **Terraform** and monitored via **Prometheus + Grafana**.
+> An AI-powered GitHub App, CI/CD Guardian, and GitOps Automation Engine that reviews Pull Requests, analyzes CI/CD failures, automates Kubernetes deployments, and provides real-time DevOps observability.
+
+![AI DevOps Assistant](https://img.shields.io/badge/AI-DevOps%20Assistant-blueviolet)
+![Python](https://img.shields.io/badge/Python-3.x-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-Production-green)
+![Docker](https://img.shields.io/badge/Docker-Containerized-blue)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-EKS-326CE5)
+![Terraform](https://img.shields.io/badge/Terraform-Infrastructure-7B42BC)
+![ArgoCD](https://img.shields.io/badge/ArgoCD-GitOps-orange)
+![Prometheus](https://img.shields.io/badge/Prometheus-Monitoring-E6522C)
 
 ---
 
-## 🏗️ System Architecture
+## 🚀 Overview
+
+The **AI-Powered DevOps Assistant** integrates directly into a GitHub repository's development and deployment pipeline.
+
+It combines:
+
+* 🤖 AI-powered Pull Request reviews
+* 🔐 Automated security analysis
+* 🚨 CI/CD failure diagnosis
+* 🐳 Docker image automation
+* ☁️ AWS EKS deployment
+* 🔄 GitOps with ArgoCD
+* 🏗️ Infrastructure as Code with Terraform
+* 📊 Prometheus + Grafana monitoring
+* 🖥️ Real-time DevOps operations dashboard
+* 🔗 GitHub webhook automation
+
+The system is designed to automate repetitive DevOps tasks while giving developers actionable explanations and suggested fixes.
+
+---
+
+# 🏗️ System Architecture
 
 ```mermaid
 flowchart TD
+
     subgraph GitHub["GitHub Ecosystem"]
         PR[Pull Request Opened / Synchronized]
         GHA[GitHub Actions: Lint, Test, Trivy, SonarQube]
@@ -15,35 +46,35 @@ flowchart TD
         Fail[Workflow Run Failure]
     end
 
-    subgraph DevOpsBot["AI DevOps Assistant Service (FastAPI)"]
+    subgraph DevOpsBot["AI DevOps Assistant Service"]
         WH[Webhook & Event Gateway]
         LLM[LLM Engine: Gemini / OpenAI]
         PRReviewer[PR Diff & Security Scan Analyzer]
         LogAnalyzer[CI/CD Failure Diagnostic Engine]
         GitOpsSync[GitOps & ArgoCD Orchestrator]
-        Dashboard[Modern Operations Dashboard & Simulator]
+        Dashboard[Operations Dashboard & Simulator]
     end
 
-    subgraph GitOpsK8s["GitOps & Kubernetes (AWS EKS)"]
-        ECR[Amazon ECR Container Registry]
+    subgraph GitOpsK8s["GitOps & Kubernetes"]
+        ECR[Amazon ECR]
         ArgoCD[ArgoCD GitOps Controller]
-        K8sCluster[EKS Workloads & Services]
+        K8sCluster[AWS EKS Workloads]
     end
 
-    subgraph MonitoringInfra["AWS Infra & Observability (Terraform)"]
-        TF[Terraform: VPC, EKS, ECR, IAM]
-        Prom[Prometheus Metrics]
-        Graf[Grafana Dashboards & Alerts]
+    subgraph MonitoringInfra["AWS Infrastructure & Observability"]
+        TF[Terraform]
+        Prom[Prometheus]
+        Graf[Grafana]
     end
 
     PR -->|Webhook / Action| WH
-    GHA -->|SARIF/JSON + Diffs| PRReviewer
+    GHA -->|SARIF / JSON + Diffs| PRReviewer
     PRReviewer --> LLM
-    LLM -->|Formatted PR Review + Suggestions| PR
+    LLM -->|PR Review + Suggestions| PR
 
-    Fail -->|Workflow Run Failure / Logs| LogAnalyzer
+    Fail -->|Workflow Failure + Logs| LogAnalyzer
     LogAnalyzer --> LLM
-    LLM -->|Root Cause Analysis & Fix Patch| PR
+    LLM -->|Root Cause + Fix Patch| PR
 
     Merge -->|CI/CD on Merge| ECR
     ECR --> GitOpsSync
@@ -53,289 +84,859 @@ flowchart TD
     TF --> K8sCluster
     K8sCluster --> Prom
     Prom --> Graf
+
     WH --> Dashboard
 ```
 
----
-
-## 🌟 Key Capabilities
-
-### 1. 🔍 Automated PR Code & Security Review
-- **Triggered On**: Every Pull Request (`opened`, `synchronize`, `reopened`).
-- **Pipeline Scans**: Integrates **Trivy** (container vulnerabilities, OS CVEs, misconfigurations) and **SonarQube** (code smells, bugs, security hotspots).
-- **AI Synthesis**: Combines the unified diff + security scan outputs into an executive summary, risk rating (Low/Medium/High/Critical), and **one-click GitHub suggestion diff blocks** (` ```suggestion `).
-
-### 2. 🚨 Intelligent CI/CD Failure Diagnoser
-- **Triggered On**: Any failed GitHub Actions workflow run (`workflow_run.conclusion == 'failure'`).
-- **Root Cause Isolation**: Ingests raw build logs, isolates failing stack traces, explains the failure in plain language, and generates an exact code, command, or workflow patch.
-
-### 3. 🚀 Zero-Downtime GitOps Deployments (ArgoCD on Merge)
-- **Triggered On**: PR merged into `main`.
-- **Workflow**:
-  1. GitHub Actions builds multi-arch Docker image tagged with commit SHA.
-  2. Pushes image to Amazon ECR.
-  3. Updates the target GitOps manifest repository (Kustomize/Helm values).
-  4. Triggers ArgoCD application sync for zero-downtime rolling update on AWS EKS.
-  5. Posts deployment confirmation comment to the PR.
-
-### 4. ☁️ Production AWS Infrastructure (Terraform)
-- **Multi-AZ VPC**: 3 Public + 3 Private subnets with NAT Gateways.
-- **Amazon EKS Cluster**: Managed node groups, IAM Roles for Service Accounts (IRSA), OIDC provider.
-- **Amazon ECR**: Container registry with scan-on-push and automated lifecycle retention policies.
-- **ArgoCD & Prometheus Stack**: Bootstrapped via Terraform Helm provider with Alertmanager and Grafana dashboards.
-
-### 5. 🖥️ Real-Time Operations Dashboard & Simulator
-- **Live Status Badges**: LLM health, ArgoCD sync state, EKS connectivity.
-- **PR Review Studio**: Test arbitrary diffs and Trivy/SonarQube reports with instant markdown rendering.
-- **CI/CD Failure Console**: Test raw error logs and view isolated root causes.
-- **Webhook Simulator**: Test GitHub webhook events (`pull_request`, `workflow_run`) with live feed updates.
+The architecture connects GitHub events, the FastAPI AI service, LLM analysis, GitHub Actions, AWS infrastructure, Kubernetes, ArgoCD, and monitoring into one DevOps workflow.
 
 ---
 
-## 📂 Project Structure
+# 🌟 Key Features
 
+## 1. 🔍 Automated PR Code & Security Review
+
+Every Pull Request can trigger an automated review.
+
+### Workflow
+
+```text
+Pull Request
+      ↓
+GitHub Actions
+      ↓
+Lint + Tests + Trivy + SonarQube
+      ↓
+Unified Diff + Security Results
+      ↓
+AI Analysis
+      ↓
+PR Review + Suggested Fixes
 ```
+
+### Features
+
+* PR diff analysis
+* Code-quality review
+* Security vulnerability detection
+* Trivy integration
+* SonarQube integration
+* AI-generated review summary
+* Risk classification
+* Suggested code changes
+* GitHub PR comments
+* GitHub suggestion blocks
+
+The system supports `opened`, `synchronize`, and `reopened` Pull Request events.
+
+---
+
+## 2. 🚨 Intelligent CI/CD Failure Diagnoser
+
+When a GitHub Actions workflow fails, the assistant can analyze the failure automatically.
+
+### Workflow
+
+```text
+GitHub Actions Failure
+        ↓
+Build Logs
+        ↓
+Failure / Stack Trace Extraction
+        ↓
+AI Analysis
+        ↓
+Root Cause
+        ↓
+Suggested Fix / Patch
+```
+
+### Capabilities
+
+* Reads CI/CD build logs
+* Identifies the failing step
+* Extracts relevant errors
+* Explains failures in plain English
+* Identifies probable root causes
+* Generates code or configuration patches
+* Helps developers debug faster
+
+The system is designed around `workflow_run.conclusion == 'failure'` events.
+
+---
+
+# 3. 🚀 GitOps Deployment with ArgoCD
+
+After a Pull Request is merged into `main`, the deployment pipeline can automatically promote the application.
+
+### Deployment Flow
+
+```text
+PR Merged
+    ↓
+GitHub Actions
+    ↓
+Docker Build
+    ↓
+Amazon ECR
+    ↓
+GitOps Manifest Update
+    ↓
+ArgoCD Sync
+    ↓
+AWS EKS
+    ↓
+Rolling Deployment
+```
+
+### Deployment Process
+
+1. Build a multi-architecture Docker image.
+2. Tag the image using the commit SHA.
+3. Push the image to Amazon ECR.
+4. Update the GitOps repository.
+5. Trigger ArgoCD synchronization.
+6. Deploy the new version to AWS EKS.
+7. Post deployment confirmation back to GitHub.
+
+---
+
+# 4. ☁️ AWS Infrastructure with Terraform
+
+Infrastructure is provisioned using Terraform.
+
+### Infrastructure Includes
+
+* AWS VPC
+* Public and private subnets
+* NAT Gateways
+* Amazon EKS
+* Managed node groups
+* IAM roles
+* OIDC / IRSA
+* Amazon ECR
+* ArgoCD
+* Prometheus
+* Grafana
+* Kubernetes monitoring
+
+The project configuration specifies a Multi-AZ VPC with 3 public and 3 private subnets and Terraform-managed EKS/ECR infrastructure.
+
+---
+
+# 5. 📊 Monitoring & Observability
+
+The system exposes application metrics for Prometheus and visualization through Grafana.
+
+### Monitoring Stack
+
+```text
+Application
+     ↓
+Prometheus Metrics
+     ↓
+Prometheus
+     ↓
+Grafana
+     ↓
+Dashboards + Alerts
+```
+
+Tracked metrics include:
+
+* Request latency
+* PR review counters
+* GitOps synchronization counters
+* Application health
+* Kubernetes metrics
+* Service availability
+
+---
+
+# 6. 🖥️ Real-Time Operations Dashboard
+
+The project includes a modern operations dashboard for interacting with and testing the system.
+
+### Dashboard Features
+
+* Live system status
+* LLM health indicator
+* ArgoCD sync status
+* EKS connectivity status
+* PR Review Studio
+* CI/CD Failure Diagnoser
+* Webhook Simulator
+* Live event feed
+* GitOps monitoring
+* Security scan results
+
+---
+
+# 🎬 Live Application Showcase
+
+The AI DevOps Assistant includes a live interactive operations console demonstrating:
+
+* Automated PR reviews
+* CI/CD failure root-cause analysis
+* GitOps event simulation
+* Deployment monitoring
+* Webhook events
+
+> **Local application:** `http://127.0.0.1:8000`
+
+## 📸 Feature Walkthrough
+
+### Operations Dashboard
+
+![Operations Dashboard & Status Indicators](./screenshots/initial_page_load.png)
+
+### PR Code & Security Review
+
+![PR Code & Security Review Studio Results](./screenshots/pr_review_results.png)
+
+### CI/CD Failure Diagnosis
+
+![CI/CD Build Failure Diagnosis & Fix Patch](./screenshots/cicd_diagnosis_results.png)
+
+### Webhook Event Simulator
+
+![Live Webhook Event Simulator & Audit Stream](./screenshots/all_simulated_events.png)
+
+### GitOps / ArgoCD Monitor
+
+![GitOps & ArgoCD Kubernetes Sync Monitor](./screenshots/gitops_tab_clean.png)
+
+> **Important:** Place the five screenshot files inside a `screenshots/` folder in your repository and keep the filenames exactly as referenced above.
+
+---
+
+# 🛠️ API Endpoints
+
+| Capability         | Endpoint                     | Description                 |
+| ------------------ | ---------------------------- | --------------------------- |
+| 🖥️ Dashboard      | `GET /`                      | Operations dashboard        |
+| 🔍 PR Review       | `POST /api/analyze-pr`       | Diff + security analysis    |
+| 🚨 CI/CD Diagnosis | `POST /api/diagnose-failure` | Failure root-cause analysis |
+| 🔗 GitHub Webhook  | `POST /webhook`              | GitHub event receiver       |
+| 🚀 GitOps Sync     | `POST /api/gitops/sync`      | ArgoCD deployment trigger   |
+| ❤️ Health Check    | `GET /healthz`               | Health/readiness check      |
+| 📊 Metrics         | `GET /metrics`               | Prometheus metrics          |
+
+These endpoints are documented by the project showcase.
+
+---
+
+# 📂 Project Structure
+
+```text
 ai-devops-assistant/
-├── .github/workflows/
-│   ├── pr-security-and-ai-review.yml    # Lint, test, Trivy, SonarQube, AI PR review
-│   ├── pipeline-failure-reporter.yml    # Build failure log extractor & AI diagnostic
-│   └── ci-cd-on-merge.yml               # Docker build, ECR push, GitOps ArgoCD sync
+│
+├── .github/
+│   └── workflows/
+│       ├── pr-security-and-ai-review.yml
+│       ├── pipeline-failure-reporter.yml
+│       └── ci-cd-on-merge.yml
+│
 ├── app/
-│   ├── config.py                        # Pydantic Settings & environment variables
-│   ├── main.py                          # FastAPI server, metrics middleware, static routes
+│   ├── config.py
+│   ├── main.py
+│   │
 │   ├── routers/
-│   │   ├── api.py                       # REST API & simulator endpoints
-│   │   └── webhooks.py                  # GitHub webhook receiver (HMAC signature verification)
+│   │   ├── api.py
+│   │   └── webhooks.py
+│   │
 │   ├── services/
-│   │   ├── github_service.py            # GitHub App JWT, diff fetching, comments, logs
-│   │   ├── gitops_service.py            # ArgoCD sync & manifest patch generator
-│   │   └── llm_engine.py                # Multi-provider LLM (Gemini, OpenAI, Mock)
+│   │   ├── github_service.py
+│   │   ├── gitops_service.py
+│   │   └── llm_engine.py
+│   │
 │   └── static/
-│       ├── css/style.css                # Modern dark-mode styling & glassmorphism
-│       ├── js/app.js                    # Interactive dashboard logic & simulator
-│       └── index.html                   # Dashboard UI
+│       ├── css/
+│       │   └── style.css
+│       ├── js/
+│       │   └── app.js
+│       └── index.html
+│
 ├── k8s/
-│   ├── deployment.yaml                  # Kubernetes Deployment with health probes & securityContext
-│   ├── service.yaml                     # Service, Ingress (AWS ALB), and HPA
+│   ├── deployment.yaml
+│   ├── service.yaml
 │   └── monitoring/
-│       └── servicemonitor.yaml          # Prometheus ServiceMonitor & PrometheusRule alerts
+│       └── servicemonitor.yaml
+│
 ├── argocd/
-│   └── application.yaml                 # ArgoCD Application CRD for automated GitOps
+│   └── application.yaml
+│
 ├── terraform/
-│   ├── main.tf                          # Providers (AWS, K8s, Helm)
-│   ├── vpc.tf                           # Multi-AZ VPC with NAT Gateways
-│   ├── eks.tf                           # Amazon EKS cluster & node groups
-│   ├── ecr.tf                           # Amazon ECR with lifecycle rules
-│   ├── argocd.tf                        # Helm release for ArgoCD
-│   ├── monitoring.tf                    # Helm release for kube-prometheus-stack (Grafana)
-│   ├── variables.tf                     # Input variables
-│   └── outputs.tf                       # Cluster endpoints, ECR URLs, ArgoCD URL
+│   ├── main.tf
+│   ├── vpc.tf
+│   ├── eks.tf
+│   ├── ecr.tf
+│   ├── argocd.tf
+│   ├── monitoring.tf
+│   ├── variables.tf
+│   └── outputs.tf
+│
 ├── tests/
-│   ├── test_api.py                      # FastAPI endpoint tests
-│   ├── test_llm_engine.py               # Diff & log analysis unit tests
-│   └── test_webhook.py                  # Webhook signature & event tests
-├── Dockerfile                           # Production multi-stage Dockerfile
-├── docker-compose.yml                   # Local development stack (App + Prom + Grafana)
-└── requirements.txt                     # Python dependencies
+│   ├── test_api.py
+│   ├── test_llm_engine.py
+│   └── test_webhook.py
+│
+├── screenshots/
+│   ├── initial_page_load.png
+│   ├── pr_review_results.png
+│   ├── cicd_diagnosis_results.png
+│   ├── all_simulated_events.png
+│   └── gitops_tab_clean.png
+│
+├── Dockerfile
+├── docker-compose.yml
+└── requirements.txt
 ```
 
 ---
 
-## 🚀 Getting Started
+# 🚀 Getting Started
 
-### 1. Local Development Setup
+## 1. Clone the Repository
 
-1. **Clone and create a virtual environment**:
-   ```powershell
-   cd C:\Users\agrah\.gemini\antigravity-ide\scratch\ai-devops-assistant
-   python -m venv .venv
-   .venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
-
-2. **Configure Environment Variables** (Optional - works out of the box with high-fidelity mock engine):
-   Create a `.env` file:
-   ```env
-   # LLM Provider (choose 'gemini' or 'openai' or 'mock')
-   LLM_PROVIDER=gemini
-   GEMINI_API_KEY=your-gemini-api-key
-   # OPENAI_API_KEY=your-openai-api-key
-
-   # GitHub App Configuration (Optional for local testing)
-   GITHUB_APP_ID=123456
-   GITHUB_WEBHOOK_SECRET=devops-assistant-webhook-secret
-   # GitHub OAuth App configuration
-   # GITHUB_CLIENT_ID=your-github-oauth-client-id
-   # GITHUB_CLIENT_SECRET=your-github-oauth-client-secret
-   # GITHUB_REDIRECT_URI=http://localhost:8000/auth/github/callback
-   # GITHUB_APP_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\n..."
-
-   # ArgoCD & GitOps
-   ARGOCD_SERVER_URL=https://argocd.internal.infra
-   ARGOCD_AUTH_TOKEN=your-argocd-token
-   ```
-
-3. **Run the Assistant Server**:
-   ```powershell
-   uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-   ```
-
-4. **Access the Dashboard**:
-   Open [http://localhost:8000](http://localhost:8000) in your browser.
-   - Test PR reviews using the **PR Review Studio** tab.
-   - Test build failure diagnosis using the **CI/CD Failure Diagnoser** tab.
-   - Simulate webhook events using the **Live Events & Simulator** tab.
+```bash
+git clone https://github.com/YOUR_USERNAME/ai-devops-assistant.git
+cd ai-devops-assistant
+```
 
 ---
 
-### 2. Running Automated Tests
+## 2. Create a Virtual Environment
 
-Run the test suite with `pytest`:
+### Windows
+
 ```powershell
+python -m venv .venv
+.venv\Scripts\activate
+```
+
+### Linux / macOS
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+---
+
+## 3. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+# 🔐 Environment Configuration
+
+Create a `.env` file:
+
+```env
+# LLM Provider
+LLM_PROVIDER=gemini
+
+# Gemini
+GEMINI_API_KEY=your-gemini-api-key
+
+# Optional OpenAI
+# OPENAI_API_KEY=your-openai-api-key
+
+# GitHub App
+GITHUB_APP_ID=123456
+GITHUB_WEBHOOK_SECRET=your-webhook-secret
+
+# Optional GitHub OAuth
+# GITHUB_CLIENT_ID=your-client-id
+# GITHUB_CLIENT_SECRET=your-client-secret
+# GITHUB_REDIRECT_URI=http://localhost:8000/auth/github/callback
+
+# GitHub App Private Key
+# GITHUB_APP_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\n..."
+
+# ArgoCD
+ARGOCD_SERVER_URL=https://your-argocd-server
+ARGOCD_AUTH_TOKEN=your-argocd-token
+```
+
+The original project supports Gemini, OpenAI, and a high-fidelity mock LLM engine for local testing.
+
+> **Security:** Never commit `.env`, API keys, GitHub private keys, or ArgoCD tokens to GitHub.
+
+Add this to `.gitignore`:
+
+```gitignore
+.env
+.venv/
+__pycache__/
+*.pem
+*.key
+```
+
+---
+
+# ▶️ Run the Application
+
+Start the FastAPI server:
+
+```bash
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+Then open:
+
+```text
+http://localhost:8000
+```
+
+The dashboard provides:
+
+* PR Review Studio
+* CI/CD Failure Diagnoser
+* Live Events & Simulator
+
+---
+
+# 📚 API Documentation
+
+FastAPI automatically provides Swagger documentation.
+
+Open:
+
+```text
+http://localhost:8000/docs
+```
+
+Other useful endpoints:
+
+```text
+http://localhost:8000/
+http://localhost:8000/docs
+http://localhost:8000/metrics
+http://localhost:8000/healthz
+```
+
+---
+
+# 🧪 Run Tests
+
+Run the complete test suite:
+
+```bash
 pytest tests/ -v
 ```
 
+The project includes tests for:
+
+* FastAPI endpoints
+* LLM analysis
+* GitHub webhook validation
+
 ---
 
-### 3. Running with Docker Compose
+# 🐳 Docker Compose
 
-Run the full local observability and assistant stack:
-```powershell
+Run the complete local stack:
+
+```bash
 docker-compose up --build -d
 ```
-- **Assistant Dashboard**: [http://localhost:8000](http://localhost:8000)
-- **Prometheus Metrics**: [http://localhost:9090](http://localhost:9090)
-- **Grafana Dashboard**: [http://localhost:3000](http://localhost:3000) (User: `admin`, Pass: `admin`)
+
+Services:
+
+| Service                | URL                     |
+| ---------------------- | ----------------------- |
+| 🤖 Assistant Dashboard | `http://localhost:8000` |
+| 📊 Prometheus          | `http://localhost:9090` |
+| 📈 Grafana             | `http://localhost:3000` |
+
+Default Grafana credentials:
+
+```text
+Username: admin
+Password: admin
+```
 
 ---
 
-### 4. Deploying to AWS via Terraform
+# ☁️ Deploy to AWS
 
-1. **Initialize and Review Plan**:
-   ```powershell
-   cd terraform
-   terraform init
-   terraform plan -out=tfplan
-   ```
+The project uses Terraform to provision AWS infrastructure.
 
-2. **Apply Infrastructure**:
-   ```powershell
-   terraform apply tfplan
-   ```
-   This provisions:
-   - AWS VPC with public and private subnets.
-   - Amazon EKS cluster with 3 worker nodes.
-   - Amazon ECR repository for container images.
-   - ArgoCD server running in `argocd` namespace.
-   - Prometheus Operator & Grafana in `monitoring` namespace.
+## Initialize Terraform
 
-3. **Deploy the Assistant into EKS**:
-   ```powershell
-   kubectl apply -f ../k8s/
-   kubectl apply -f ../argocd/application.yaml
-   ```
+```bash
+cd terraform
+
+terraform init
+```
+
+## Review Infrastructure
+
+```bash
+terraform plan -out=tfplan
+```
+
+## Apply Infrastructure
+
+```bash
+terraform apply tfplan
+```
+
+This provisions the AWS infrastructure required for:
+
+* VPC
+* EKS
+* ECR
+* ArgoCD
+* Prometheus
+* Grafana
 
 ---
 
-## 🔐 GitHub App Registration & Webhook Setup
+# ☸️ Deploy to Kubernetes
 
-1. Go to **GitHub Settings > Developer Settings > GitHub Apps > New GitHub App**.
-2. Set **Webhook URL** to: `https://<YOUR_INGRESS_DOMAIN>/webhook/github`.
-3. Set **Webhook Secret** matching `GITHUB_WEBHOOK_SECRET`.
-4. Configure Repository Permissions:
-   - **Pull requests**: Read & Write
-   - **Actions / Checks**: Read
-   - **Contents**: Read
-   - **Issues**: Read & Write
-5. Subscribe to events: `Pull request`, `Workflow run`, `Issue comment`.
-6. Download the private key (`.pem`) and store it securely.
+After the infrastructure is available:
 
+```bash
+kubectl apply -f ../k8s/
+```
 
-## 🤝 Contributing
+Deploy the ArgoCD application:
 
-Contributions are welcome! If you have an idea, bug fix, improvement, or new feature that can make the **AI-Powered DevOps Assistant** better, feel free to contribute through a Pull Request.
+```bash
+kubectl apply -f ../argocd/application.yaml
+```
 
-### 🚀 How to Contribute
+---
 
-1. **Fork this repository**
+# 🔗 GitHub App Setup
 
-   * Click the **Fork** button at the top-right of this GitHub repository.
+Create a GitHub App:
 
-2. **Clone your fork**
+```text
+GitHub
+ → Settings
+ → Developer Settings
+ → GitHub Apps
+ → New GitHub App
+```
 
-   ```bash
-   git clone https://github.com/YOUR-USERNAME/ai-devops-assistant.git
-   cd ai-devops-assistant
-   ```
+Configure the webhook:
 
-3. **Create a new branch**
+```text
+https://<YOUR_INGRESS_DOMAIN>/webhook/github
+```
 
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
+Set the webhook secret to match:
 
-4. **Make your changes**
+```env
+GITHUB_WEBHOOK_SECRET=your-webhook-secret
+```
 
-   * Add your feature, fix a bug, improve documentation, tests, UI, CI/CD workflows, or infrastructure.
-   * Keep changes focused and follow the existing project structure and coding style.
+### Required Repository Permissions
 
-5. **Run the tests**
+| Permission       | Access       |
+| ---------------- | ------------ |
+| Pull Requests    | Read & Write |
+| Actions / Checks | Read         |
+| Contents         | Read         |
+| Issues           | Read & Write |
 
-   ```bash
-   pytest tests/ -v
-   ```
+### Subscribe to Events
 
-6. **Commit your changes**
+* Pull request
+* Workflow run
+* Issue comment
 
-   ```bash
-   git add .
-   git commit -m "feat: add your feature"
-   ```
+Store the GitHub App private key securely.
 
-7. **Push your branch**
+---
 
-   ```bash
-   git push origin feature/your-feature-name
-   ```
+# 🔄 Complete DevOps Workflow
 
-8. **Open a Pull Request**
+The complete automated workflow looks like this:
 
-   * Go to your fork on GitHub.
-   * Click **Compare & pull request**.
-   * Clearly describe what you changed and why.
-   * Include screenshots, logs, or test results when useful.
-   * Submit the Pull Request for review.
+```text
+                    ┌─────────────────┐
+                    │     Developer   │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │   Pull Request  │
+                    └────────┬────────┘
+                             │
+                             ▼
+                 ┌───────────────────────┐
+                 │    GitHub Actions     │
+                 │ Lint + Test + Security│
+                 └───────────┬───────────┘
+                             │
+                             ▼
+                 ┌───────────────────────┐
+                 │   AI DevOps Assistant │
+                 │                       │
+                 │ • PR Review           │
+                 │ • Security Analysis   │
+                 │ • Failure Diagnosis  │
+                 └───────────┬───────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │   GitHub PR     │
+                    │ Comments/Fixes  │
+                    └────────┬────────┘
+                             │
+                          Merge
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │ Docker Build    │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │   Amazon ECR    │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │    ArgoCD       │
+                    │  GitOps Sync    │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │    AWS EKS      │
+                    │   Kubernetes    │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │ Prometheus +    │
+                    │ Grafana         │
+                    └─────────────────┘
+```
 
-### ✅ Pull Request Guidelines
+---
 
-Before submitting a PR, please make sure:
+# 🧠 AI Components
 
-* [ ] The project still runs locally.
-* [ ] Existing tests pass.
-* [ ] New functionality includes appropriate tests where applicable.
-* [ ] No API keys, passwords, private keys, tokens, or other secrets are committed.
-* [ ] Documentation is updated when necessary.
-* [ ] The PR has a clear title and description.
-* [ ] Changes are focused on the purpose of the PR.
+The AI layer can use:
 
-### 💡 What You Can Contribute
+* Google Gemini
+* OpenAI
+* Mock LLM engine for development
 
-You can contribute to areas such as:
+The LLM is used for:
 
-* 🤖 AI/LLM code review and failure diagnosis
-* 🔐 Security scanning and DevSecOps integrations
-* 🐙 GitHub App and webhook integrations
-* ⚙️ GitHub Actions and CI/CD workflows
-* 🐳 Docker and containerization
-* ☸️ Kubernetes and ArgoCD
-* ☁️ AWS and Terraform infrastructure
-* 📊 Prometheus/Grafana monitoring
-* 🖥️ Dashboard/UI improvements
-* 🧪 Automated tests
-* 📚 Documentation and examples
-* 🐛 Bug fixes and performance improvements
+### PR Analysis
 
-If you are unsure about a change, open an **Issue** first to discuss the idea before starting a large implementation.
+```text
+Git Diff
+   +
+Security Scan Results
+   ↓
+LLM
+   ↓
+Summary
+Risk
+Issues
+Suggestions
+```
 
-**Thank you for contributing! 🚀**
+### CI/CD Diagnosis
 
+```text
+Build Logs
+   ↓
+Error Extraction
+   ↓
+LLM
+   ↓
+Root Cause
+   ↓
+Recommended Fix
+```
+
+---
+
+# 🔐 Security
+
+The application includes several security-oriented components:
+
+* GitHub webhook HMAC-SHA256 verification
+* Trivy vulnerability scanning
+* SonarQube analysis
+* Kubernetes security contexts
+* AWS IAM / IRSA
+* ECR image scanning
+* Environment-based secrets
+* GitHub App authentication
+
+Never commit production credentials or private keys to the repository.
+
+---
+
+# 📈 Observability
+
+Prometheus metrics are exposed through:
+
+```text
+GET /metrics
+```
+
+Health checks are available through:
+
+```text
+GET /healthz
+```
+
+These can be consumed by Kubernetes monitoring and Grafana dashboards.
+
+---
+
+# 🤝 Contributing
+
+Contributions are welcome!
+
+If you have an idea, bug fix, improvement, security enhancement, or new feature that can make the **AI-Powered DevOps Assistant** better, feel free to contribute through a Pull Request.
+
+## 🚀 How to Contribute
+
+### 1. Fork the Repository
+
+Click the **Fork** button at the top-right of this GitHub repository.
+
+### 2. Clone Your Fork
+
+```bash
+git clone https://github.com/YOUR_USERNAME/ai-devops-assistant.git
+cd ai-devops-assistant
+```
+
+### 3. Create a Feature Branch
+
+```bash
+git checkout -b feature/your-feature-name
+```
+
+### 4. Make Your Changes
+
+Implement your feature, bug fix, documentation update, or improvement.
+
+### 5. Run Tests
+
+```bash
+pytest tests/ -v
+```
+
+Make sure existing functionality continues to work.
+
+### 6. Commit Your Changes
+
+```bash
+git add .
+git commit -m "feat: add your feature"
+```
+
+### 7. Push Your Branch
+
+```bash
+git push origin feature/your-feature-name
+```
+
+### 8. Open a Pull Request
+
+Go to your GitHub fork and create a Pull Request against the main repository.
+
+---
+
+# 📋 Contribution Guidelines
+
+Before submitting a Pull Request:
+
+* Keep changes focused and understandable.
+* Follow the existing project structure.
+* Add tests for new functionality where appropriate.
+* Update documentation when adding new features.
+* Do not commit secrets or credentials.
+* Ensure the application still starts successfully.
+* Run the test suite before opening a PR.
+
+---
+
+# 🗺️ Future Improvements
+
+Potential future enhancements include:
+
+* Multi-repository GitHub App support
+* More LLM providers
+* Automatic issue creation
+* Slack / Discord notifications
+* Advanced security scanning
+* AI-generated incident reports
+* Automatic rollback detection
+* Cost monitoring
+* Advanced Grafana dashboards
+* Kubernetes anomaly detection
+* AI-powered infrastructure recommendations
+* Multi-cloud deployment support
+
+---
+
+# ⭐ Why This Project?
+
+This project brings together multiple modern engineering domains:
+
+```text
+AI / LLM
+   +
+Python / FastAPI
+   +
+GitHub Actions
+   +
+Docker
+   +
+Kubernetes
+   +
+AWS
+   +
+Terraform
+   +
+ArgoCD
+   +
+Prometheus
+   +
+Grafana
+```
+
+Instead of building an isolated AI application, the **AI DevOps Assistant** demonstrates how AI can be integrated into a real software delivery lifecycle.
+
+---
+
+# 📜 License
+
+This project is available under the **MIT License**.
+
+---
+
+# 👨‍💻 Author
+
+**Harshit Agrahari**
+
+* GitHub: `Harshit4grahari`
+* LinkedIn: `harshit-agrahari-5621a0299`
+
+---
+
+## ⭐ If You Like This Project
+
+Give the repository a ⭐ on GitHub and feel free to contribute!
+
+Built with ❤️ using **AI + DevOps + Cloud + Kubernetes + GitOps**.
