@@ -249,3 +249,93 @@ docker-compose up --build -d
    - **Issues**: Read & Write
 5. Subscribe to events: `Pull request`, `Workflow run`, `Issue comment`.
 6. Download the private key (`.pem`) and store it securely.
+
+
+## 🤝 Contributing
+
+Contributions are welcome! If you have an idea, bug fix, improvement, or new feature that can make the **AI-Powered DevOps Assistant** better, feel free to contribute through a Pull Request.
+
+### 🚀 How to Contribute
+
+1. **Fork this repository**
+
+   * Click the **Fork** button at the top-right of this GitHub repository.
+
+2. **Clone your fork**
+
+   ```bash
+   git clone https://github.com/YOUR-USERNAME/ai-devops-assistant.git
+   cd ai-devops-assistant
+   ```
+
+3. **Create a new branch**
+
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+4. **Make your changes**
+
+   * Add your feature, fix a bug, improve documentation, tests, UI, CI/CD workflows, or infrastructure.
+   * Keep changes focused and follow the existing project structure and coding style.
+
+5. **Run the tests**
+
+   ```bash
+   pytest tests/ -v
+   ```
+
+6. **Commit your changes**
+
+   ```bash
+   git add .
+   git commit -m "feat: add your feature"
+   ```
+
+7. **Push your branch**
+
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+8. **Open a Pull Request**
+
+   * Go to your fork on GitHub.
+   * Click **Compare & pull request**.
+   * Clearly describe what you changed and why.
+   * Include screenshots, logs, or test results when useful.
+   * Submit the Pull Request for review.
+
+### ✅ Pull Request Guidelines
+
+Before submitting a PR, please make sure:
+
+* [ ] The project still runs locally.
+* [ ] Existing tests pass.
+* [ ] New functionality includes appropriate tests where applicable.
+* [ ] No API keys, passwords, private keys, tokens, or other secrets are committed.
+* [ ] Documentation is updated when necessary.
+* [ ] The PR has a clear title and description.
+* [ ] Changes are focused on the purpose of the PR.
+
+### 💡 What You Can Contribute
+
+You can contribute to areas such as:
+
+* 🤖 AI/LLM code review and failure diagnosis
+* 🔐 Security scanning and DevSecOps integrations
+* 🐙 GitHub App and webhook integrations
+* ⚙️ GitHub Actions and CI/CD workflows
+* 🐳 Docker and containerization
+* ☸️ Kubernetes and ArgoCD
+* ☁️ AWS and Terraform infrastructure
+* 📊 Prometheus/Grafana monitoring
+* 🖥️ Dashboard/UI improvements
+* 🧪 Automated tests
+* 📚 Documentation and examples
+* 🐛 Bug fixes and performance improvements
+
+If you are unsure about a change, open an **Issue** first to discuss the idea before starting a large implementation.
+
+**Thank you for contributing! 🚀**
+
