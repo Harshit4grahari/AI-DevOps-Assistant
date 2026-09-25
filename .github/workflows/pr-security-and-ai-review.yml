@@ -1,0 +1,91 @@
+name: PR Security & AI Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+  security-events: write
+
+jobs:
+  lint-and-test:
+    name: Lint, Test & Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install ruff pytest pytest-cov
+
+      - name: Run Ruff Linter
+        run: |
+          ruff check . --output-format=github
+
+      - name: Run Pytest with Coverage
+        run: |
+          pytest tests/ --cov=app --cov-report=json:coverage.json --cov-report=term
+
+  security-scan:
+    name: Trivy & SonarQube Security Scans
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'json'
+          output: 'trivy-results.json'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+
+      - name: Run SonarQube / SonarCloud Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        continue-on-error: true
+
+      - name: Dispatch Diff & Scans to AI DevOps Assistant
+        id: ai-review
+        env:
+          DEVOPS_ASSISTANT_URL: ${{ secrets.DEVOPS_ASSISTANT_URL || 'https://ai-devops-assistant.internal.infra' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Fetch PR unified diff
+          PR_DIFF=$(gh pr diff ${{ github.event.pull_request.number }} || echo "Diff unavailable")
+          TRIVY_REPORT=$(cat trivy-results.json | jq -c '.Results[0] // {}' || echo "{}")
+          
+          # Send payload to AI DevOps Assistant endpoint
+          curl -s -X POST "$DEVOPS_ASSISTANT_URL/api/analyze/diff" \
+            -H "Content-Type: application/json" \
+            -d @- <<EOF > ai_review_response.json
+          {
+            "title": "${{ github.event.pull_request.title }}",
+            "description": "${{ github.event.pull_request.body }}",
+            "diff": $(echo "$PR_DIFF" | jq -sR .),
+            "trivy_report": $(echo "$TRIVY_REPORT" | jq -sR .)
+          }
+          EOF
+
+          # Extract generated markdown review and post as PR comment
+          REVIEW_MD=$(jq -r '.markdown_review // empty' ai_review_response.json)
+          if [ -n "$REVIEW_MD" ]; then
+            gh pr comment ${{ github.event.pull_request.number }} --body "$REVIEW_MD"
+          fi
