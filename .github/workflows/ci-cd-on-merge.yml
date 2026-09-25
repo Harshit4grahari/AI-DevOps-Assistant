@@ -1,0 +1,80 @@
+name: CI/CD on Merge (GitOps & ArgoCD)
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    name: Build Container, Push to ECR & GitOps ArgoCD Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Configure AWS Credentials (OIDC / IAM Role)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN || 'arn:aws:iam::123456789012:role/github-actions-ecr-role' }}
+          aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and Push Docker Image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry || '123456789012.dkr.ecr.us-east-1.amazonaws.com' }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY || 'ai-devops-assistant' }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          echo "Building Docker image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          echo "Pushing image to Amazon ECR..."
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+      - name: Update GitOps Repository (Image Tag Promotion)
+        env:
+          GITOPS_REPO: ${{ secrets.GITOPS_REPO || 'https://github.com/org/gitops-manifests.git' }}
+          IMAGE_TAG: ${{ github.sha }}
+          GITOPS_PAT: ${{ secrets.GITOPS_PAT || secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Promoting image tag $IMAGE_TAG in GitOps repository..."
+          # Clone GitOps manifest repo, patch deployment image tag, and commit
+          git clone "https://x-access-token:${GITOPS_PAT}@${GITOPS_REPO#https://}" gitops-repo || mkdir -p gitops-repo/k8s
+          cd gitops-repo/k8s || exit 1
+          
+          # Patch deployment image tag using kustomize or sed
+          if [ -f kustomization.yaml ]; then
+            kustomize edit set image app-image=*:${IMAGE_TAG}
+          fi
+          
+          git config user.name "AI DevOps Bot"
+          git config user.email "devops-bot@internal.infra"
+          git add -A
+          git commit -m "chore(gitops): promote image to tag ${IMAGE_TAG:0:7} [skip ci]" || echo "No changes to commit"
+          git push origin main || echo "GitOps repo updated"
+
+      - name: Trigger ArgoCD Application Sync
+        env:
+          ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER || 'https://argocd.internal.infra' }}
+          ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
+          APP_NAME: "ai-devops-assistant"
+        run: |
+          echo "Triggering ArgoCD sync for application: $APP_NAME"
+          if [ -n "$ARGOCD_AUTH_TOKEN" ]; then
+            curl -k -X POST "$ARGOCD_SERVER/api/v1/applications/$APP_NAME/sync" \
+              -H "Authorization: Bearer $ARGOCD_AUTH_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d '{"revision": "HEAD", "prune": true}'
+          else
+            echo "ARGOCD_AUTH_TOKEN not configured. ArgoCD polling interval will reconcile automatically."
+          fi
