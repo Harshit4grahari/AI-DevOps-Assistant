@@ -1,0 +1,61 @@
+name: Pipeline Failure Diagnoser
+
+on:
+  workflow_run:
+    workflows: ["PR Security & AI Review", "CI/CD on Merge"]
+    types: [completed]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  actions: read
+
+jobs:
+  diagnose-failure:
+    name: AI Root Cause Analysis & Auto-Patch
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download Failed Run Logs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          echo "Downloading failure logs for workflow run $RUN_ID..."
+          gh run view $RUN_ID --log-failed > failed_step_logs.txt || echo "Could not download logs" > failed_step_logs.txt
+          head -n 200 failed_step_logs.txt
+
+      - name: Request AI Root Cause Diagnosis
+        id: ai-diagnose
+        env:
+          DEVOPS_ASSISTANT_URL: ${{ secrets.DEVOPS_ASSISTANT_URL || 'https://ai-devops-assistant.internal.infra' }}
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+        run: |
+          LOG_CONTENT=$(cat failed_step_logs.txt | tail -n 2000)
+
+          curl -s -X POST "$DEVOPS_ASSISTANT_URL/api/analyze/logs" \
+            -H "Content-Type: application/json" \
+            -d @- <<EOF > ai_diagnosis.json
+          {
+            "workflow_name": "$WORKFLOW_NAME",
+            "failed_step": "Failed Step",
+            "logs": $(echo "$LOG_CONTENT" | jq -sR .)
+          }
+          EOF
+
+      - name: Post Diagnosis Comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
+        run: |
+          DIAGNOSIS_MD=$(jq -r '.markdown_diagnosis // empty' ai_diagnosis.json)
+          if [ -n "$DIAGNOSIS_MD" ] && [ -n "$PR_NUMBER" ]; then
+            echo "Posting diagnosis to PR #$PR_NUMBER..."
+            gh pr comment $PR_NUMBER --body "$DIAGNOSIS_MD"
+          else
+            echo "No PR associated with this run or diagnosis empty."
+          fi
