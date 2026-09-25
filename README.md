@@ -13,6 +13,16 @@
 
 ---
 
+## 🌐 Live Demo
+
+🚀 **Try the AI-Powered DevOps Assistant live:**
+
+👉 [**Launch AI DevOps Assistant**](https://ai-devops-assistant-murex.vercel.app/)
+
+> Explore the dashboard, test AI-powered PR review, CI/CD failure diagnosis, and the DevOps simulation features directly in your browser.
+
+---
+
 ## 🚀 Overview
 
 The **AI-Powered DevOps Assistant** integrates directly into a GitHub repository's development and deployment pipeline.
